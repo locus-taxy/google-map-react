@@ -856,6 +856,10 @@ export default class GoogleMap extends Component {
         dispatcher={this.markersDispatcher_} />
     ) : null;
 
+    const otherChildren =  _.flatten(this.props.children).filter(function (child) {
+          return !child.props.lat
+        })
+
     return (
       <div
         style={this.props.style}
@@ -866,7 +870,9 @@ export default class GoogleMap extends Component {
         <GoogleMapMap ref="google_map_dom" />
 
         {/* render markers before map load done */}
+        
         {mapMarkerPrerender}
+        {otherChildren}
       </div>
     );
   }
