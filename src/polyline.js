@@ -3,23 +3,32 @@ import React, {
 } from 'react';
 
 
-export default class Polyline extends Component {
+class Polyline extends Component {
     constructor(props) {
         super(props);
         var polyline = new google.maps.Polyline({
             path: this.props.path,
             strokeColor: this.props.color,
-            strokeOpacity: 1.0,
-            strokeWeight: 3
+            strokeOpacity: this.props.strokeOpacity || 1.0,
+            strokeWeight: this.props.strokeWeight || 3,
+            geodesic: this.props.geodesic,
+            icons: this.props.icons
         });
         this.state = {
             polyline: polyline
         }
     }
 
-    shouldComponentUpdate() {
+    shouldComponentUpdate(nextProps, nextState) {
+        if(nextProps.path !== this.props.path)
+            return true;
         return false;
     }
+
+    componentWillReceiveProps(nextProps){
+        this.state.polyline.setPath(nextProps.path);
+    }
+
     componentWillMount() {
         this.state.polyline.setMap(this.props.mapHelper.map);
     }
@@ -30,3 +39,5 @@ export default class Polyline extends Component {
         return (<script></script>)
     }
 }
+
+export default Polyline;
