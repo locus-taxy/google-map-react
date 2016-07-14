@@ -7,7 +7,7 @@ class Polyline extends Component {
     constructor(props) {
         super(props);
         var polyline = new google.maps.Polyline({
-            path: this.props.path,
+            path: this.props.path || [],
             strokeColor: this.props.color,
             strokeOpacity: this.props.strokeOpacity || 1.0,
             strokeWeight: this.props.strokeWeight || 3,
