@@ -26,7 +26,7 @@ class Polygon extends Component {
     }
 
     componentWillReceiveProps(nextProps){
-        this.state.polygon.setPath(nextProps.path);
+        this.state.polygon.setPaths(nextProps.latLngs);
     }
 
     componentWillMount() {
