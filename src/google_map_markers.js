@@ -1,6 +1,6 @@
-import React, {PropTypes, Component} from 'react';
-
-import shouldPureComponentUpdate from 'react-pure-render/function';
+import React, { PropTypes, Component } from 'react';
+import shallowEqual from 'fbjs/lib/shallowEqual';
+import omit from './utils/omit';
 
 const mainStyle = {
   width: '100%',
@@ -53,10 +53,20 @@ export default class GoogleMapMarkers extends Component {
     this.hoverChildProps_ = null;
     this.allowMouse_ = true;
 
-    this.state = {...this._getState(), hoverKey: null};
+    this.state = { ...this._getState(), hoverKey: null };
   }
 
-  shouldComponentUpdate = shouldPureComponentUpdate;
+  shouldComponentUpdate(nextProps, nextState) {
+    if (this.props.experimental === true) {
+      return !shallowEqual(this.props, nextProps) ||
+        !shallowEqual(
+          omit(this.state, ['hoverKey']),
+          omit(nextState, ['hoverKey'])
+        );
+    }
+
+    return !shallowEqual(this.props, nextProps) || !shallowEqual(this.state, nextState);
+  }
 
   componentWillUnmount() {
     this.props.dispatcher.removeListener('kON_CHANGE', this._onChangeHandler);
@@ -67,12 +77,10 @@ export default class GoogleMapMarkers extends Component {
     this.dimesionsCache_ = null;
   }
 
-  _getState = () => {
-    return {
-      children: this.props.dispatcher.getChildren(),
-      updateCounter: this.props.dispatcher.getUpdateCounter(),
-    };
-  }
+  _getState = () => ({
+    children: this.props.dispatcher.getChildren(),
+    updateCounter: this.props.dispatcher.getUpdateCounter(),
+  });
 
   _onChangeHandler = () => {
     if (!this.dimesionsCache_) {
@@ -80,7 +88,6 @@ export default class GoogleMapMarkers extends Component {
     }
 
     const prevChildCount = (this.state.children || []).length;
-
     const state = this._getState();
 
     this.setState(
@@ -125,7 +132,7 @@ export default class GoogleMapMarkers extends Component {
 
     this.hoverChildProps_ = childProps;
     this.hoverKey_ = hoverKey;
-    this.setState({hoverKey: hoverKey});
+    this.setState({ hoverKey });
   }
 
   _onChildMouseLeave = () => {
@@ -143,7 +150,7 @@ export default class GoogleMapMarkers extends Component {
 
       this.hoverKey_ = null;
       this.hoverChildProps_ = null;
-      this.setState({hoverKey: null});
+      this.setState({ hoverKey: null });
     }
   }
 
@@ -175,13 +182,20 @@ export default class GoogleMapMarkers extends Component {
       const hoverDistance = this.props.getHoverDistance();
 
       React.Children.forEach(this.state.children, (child, childIndex) => {
+        // layers
+        if (child.props.latLng === undefined &&
+            child.props.lat === undefined &&
+            child.props.lng === undefined) {
+          return;
+        }
+
         const childKey = child.key !== undefined && child.key !== null ? child.key : childIndex;
         const dist = this.props.distanceToMouse(this.dimesionsCache_[childKey], mp, child.props);
         if (dist < hoverDistance) {
           distances.push(
             {
               key: childKey,
-              dist: dist,
+              dist,
               props: child.props,
             });
         }
@@ -212,14 +226,26 @@ export default class GoogleMapMarkers extends Component {
 
   render() {
     const mainElementStyle = this.props.style || mainStyle;
-
     this.dimesionsCache_ = {};
 
     const markers = React.Children.map(this.state.children, (child, childIndex) => {
-      const pt = this.props.geoService.project({
-        lat: child.props.lat,
-        lng: child.props.lng,
-      }, this.props.projectFromLeftTop);
+      if (child.props.latLng === undefined &&
+          child.props.lat === undefined &&
+          child.props.lng === undefined) {
+        return (
+          React.cloneElement(child, {
+            $geoService: this.props.geoService,
+            $onMouseAllow: this._onMouseAllow,
+            $prerender: this.props.prerender,
+          })
+        );
+      }
+
+      const latLng = child.props.latLng !== undefined
+        ? child.props.latLng
+        : { lat: child.props.lat, lng: child.props.lng };
+
+      const pt = this.props.geoService.project(latLng, this.props.projectFromLeftTop);
 
       const stylePtPos = {
         left: pt.x,
@@ -239,17 +265,17 @@ export default class GoogleMapMarkers extends Component {
       // to prevent rerender on child element i need to pass
       // const params $getDimensions and $dimensionKey instead of dimension object
       const childKey = child.key !== undefined && child.key !== null ? child.key : childIndex;
+
       this.dimesionsCache_[childKey] = {
         x: pt.x + dx,
         y: pt.y + dy,
-        lat: child.props.lat,
-        lng: child.props.lng,
+        ...latLng,
       };
 
       return (
         <div
           key={childKey}
-          style={{...style, ...stylePtPos}}
+          style={{ ...style, ...stylePtPos }}
           className={child.props.$markerHolderClassName}
         >
           {React.cloneElement(child, {

@@ -104,14 +104,27 @@ export default class SimpleMapPage extends Component {
 * Example project:
 [main](http://istarkov.github.io/google-map-react/map/main/) ([source](https://github.com/istarkov/google-map-react-examples/blob/master/web/flux/components/examples/x_main/main_map_block.jsx)); [balderdash](http://istarkov.github.io/google-map-react/map/balderdash/) (same source as main)
 
-* Clustering example
+* Clustering example (new)
 [google-map-clustering-example](http://istarkov.github.io/google-map-clustering-example/)
 
 * All api examples:
 [google-map-react-examples](https://github.com/istarkov/google-map-react-examples)
 
 * jsbin example
-[jsbin example](https://jsbin.com/lepadusowo/edit?js,console,output)
+[jsbin example](https://jsbin.com/roqutisoqu/1/edit?js,console,output)
+
+* local develop example (new)
+[develop example](./develop)
+
+## Contribute
+
+To get a reloadable env, with map, clone this project and
+
+```shell
+npm install
+npm run start
+# open browser at localhost:4000
+```
 
 ## GoogleMap API
 
@@ -295,7 +308,7 @@ const size = {
   height: 380, // Map height in pixels
 };
 
-const {center, zoom} = fitBounds({nw, se}, size);
+const {center, zoom} = fitBounds(bounds, size);
 ```
 
 #### tile2LatLng (func)
@@ -383,6 +396,21 @@ and if so, uses it, so it won't load a second copy of the library.
 
 ```html
 <script type="text/javascript" src="https://maps.google.com/maps/api/js?libraries=places&sensor=false"></script>
+```
+
+### Override the default minimum zoom
+
+*WARNING*: Setting these options can break markers calculation, causing no homeomorphism between screen coordinates and map.
+
+You can use the `minZoomOverride` associated with the `minZoom` in the custom map options to prevent a minimum zoom from being calculated:
+
+```javascript
+function createMapOptions() {
+  return {
+    minZoomOverride: true,
+    minZoom: 2,
+  };
+}
 ```
 
 ---
