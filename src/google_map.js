@@ -37,14 +37,19 @@ function defaultOptions_(/* maps */) {
     rotateControl: true,
     mapTypeControl: false,
     // disable poi
-    styles: [{ featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] }],
+    styles: [
+      {
+        featureType: 'poi',
+        elementType: 'labels',
+        stylers: [{ visibility: 'off' }],
+      },
+    ],
     minZoom: DEFAULT_MIN_ZOOM, // dynamically recalculted if possible during init
   };
 }
 
-const latLng2Obj = (latLng) => isPlainObject(latLng)
-    ? latLng
-    : { lat: latLng[0], lng: latLng[1] };
+const latLng2Obj = (latLng) =>
+  isPlainObject(latLng) ? latLng : { lat: latLng[0], lng: latLng[1] };
 
 export default class GoogleMap extends Component {
   static propTypes = {
@@ -94,7 +99,8 @@ export default class GoogleMap extends Component {
   static defaultProps = {
     distanceToMouse(pt, mousePos /* , markerProps */) {
       return Math.sqrt(
-        (pt.x - mousePos.x) * (pt.x - mousePos.x) + (pt.y - mousePos.y) * (pt.y - mousePos.y)
+        (pt.x - mousePos.x) * (pt.x - mousePos.x) +
+          (pt.y - mousePos.y) * (pt.y - mousePos.y)
       );
     },
     hoverDistance: 30,
@@ -146,31 +152,51 @@ export default class GoogleMap extends Component {
 
     if (process.env.NODE_ENV !== 'production') {
       if (this.props.apiKey) {
-        console.warn('GoogleMap: ' +  // eslint-disable-line no-console
-                      'apiKey is deprecated, use ' +
-                      'bootstrapURLKeys={{key: YOUR_API_KEY}} instead.');
+        console.warn(
+          'GoogleMap: ' + // eslint-disable-line no-console
+            'apiKey is deprecated, use ' +
+            'bootstrapURLKeys={{key: YOUR_API_KEY}} instead.'
+        );
       }
 
       if (this.props.onBoundsChange) {
-        console.warn('GoogleMap: ' +  // eslint-disable-line no-console
-                      'onBoundsChange is deprecated, use ' +
-                      'onChange({center, zoom, bounds, ...other}) instead.');
+        console.warn(
+          'GoogleMap: ' + // eslint-disable-line no-console
+            'onBoundsChange is deprecated, use ' +
+            'onChange({center, zoom, bounds, ...other}) instead.'
+        );
       }
 
-      if (this.props.center === undefined && this.props.defaultCenter === undefined) {
-        console.warn('GoogleMap: center or defaultCenter' +  // eslint-disable-line no-console
-                      'property must be defined');
+      if (
+        this.props.center === undefined &&
+        this.props.defaultCenter === undefined
+      ) {
+        console.warn(
+          'GoogleMap: center or defaultCenter' + // eslint-disable-line no-console
+            'property must be defined'
+        );
       }
 
-      if (this.props.zoom === undefined && this.props.defaultZoom === undefined) {
-        console.warn('GoogleMap: zoom or defaultZoom' + // eslint-disable-line no-console
-                      'property must be defined');
+      if (
+        this.props.zoom === undefined &&
+        this.props.defaultZoom === undefined
+      ) {
+        console.warn(
+          'GoogleMap: zoom or defaultZoom' + // eslint-disable-line no-console
+            'property must be defined'
+        );
       }
     }
 
     if (this._isCenterDefined(this.props.center || this.props.defaultCenter)) {
-      const propsCenter = latLng2Obj(this.props.center || this.props.defaultCenter);
-      this.geoService_.setView(propsCenter, this.props.zoom || this.props.defaultZoom, 0);
+      const propsCenter = latLng2Obj(
+        this.props.center || this.props.defaultCenter
+      );
+      this.geoService_.setView(
+        propsCenter,
+        this.props.zoom || this.props.defaultZoom,
+        0
+      );
     }
 
     this.zoomAnimationInProgress_ = false;
@@ -187,8 +213,11 @@ export default class GoogleMap extends Component {
 
     // gmap can't prevent map drag if mousedown event already occured
     // the only workaround I find is prevent mousedown native browser event
-    ReactDOM.findDOMNode(this.refs.google_map_dom)
-      .addEventListener('mousedown', this._onMapMouseDownNative, true);
+    ReactDOM.findDOMNode(this.refs.google_map_dom).addEventListener(
+      'mousedown',
+      this._onMapMouseDownNative,
+      true
+    );
 
     window.addEventListener('mouseup', this._onChildMouseUp, false);
 
@@ -199,51 +228,68 @@ export default class GoogleMap extends Component {
 
     this.props.googleMapLoader(bootstrapURLKeys); // we can start load immediatly
 
-    setTimeout(() => { // to detect size
-      this._setViewSize();
-      if (this._isCenterDefined(this.props.center || this.props.defaultCenter)) {
-        this._initMap();
-      }
-    }, 0, this);
+    setTimeout(
+      () => {
+        // to detect size
+        this._setViewSize();
+        if (
+          this._isCenterDefined(this.props.center || this.props.defaultCenter)
+        ) {
+          this._initMap();
+        }
+      },
+      0,
+      this
+    );
   }
-
 
   componentWillReceiveProps(nextProps) {
     if (process.env.NODE_ENV !== 'production') {
       if (this.props.defaultCenter !== nextProps.defaultCenter) {
-        console.warn('GoogleMap: defaultCenter prop changed. ' +  // eslint-disable-line
-                      'You can\'t change default props.');
+        console.warn(
+          'GoogleMap: defaultCenter prop changed. ' + // eslint-disable-line
+            "You can't change default props."
+        );
       }
 
       if (this.props.defaultZoom !== nextProps.defaultZoom) {
-        console.warn('GoogleMap: defaultZoom prop changed. ' +  // eslint-disable-line
-                      'You can\'t change default props.');
+        console.warn(
+          'GoogleMap: defaultZoom prop changed. ' + // eslint-disable-line
+            "You can't change default props."
+        );
       }
     }
 
-    if (!this._isCenterDefined(this.props.center) && this._isCenterDefined(nextProps.center)) {
-      setTimeout(() =>
-        this._initMap(), 0);
+    if (
+      !this._isCenterDefined(this.props.center) &&
+      this._isCenterDefined(nextProps.center)
+    ) {
+      setTimeout(() => this._initMap(), 0);
     }
 
     if (this.map_) {
       const centerLatLng = this.geoService_.getCenter();
       if (this._isCenterDefined(nextProps.center)) {
         const nextPropsCenter = latLng2Obj(nextProps.center);
-        const currCenter = this._isCenterDefined(this.props.center) ?
-          latLng2Obj(this.props.center) :
-          null;
+        const currCenter = this._isCenterDefined(this.props.center)
+          ? latLng2Obj(this.props.center)
+          : null;
 
         if (
           !currCenter ||
           Math.abs(nextPropsCenter.lat - currCenter.lat) +
-          Math.abs(nextPropsCenter.lng - currCenter.lng) > kEPS
+            Math.abs(nextPropsCenter.lng - currCenter.lng) >
+            kEPS
         ) {
           if (
             Math.abs(nextPropsCenter.lat - centerLatLng.lat) +
-            Math.abs(nextPropsCenter.lng - centerLatLng.lng) > kEPS
+              Math.abs(nextPropsCenter.lng - centerLatLng.lng) >
+            kEPS
           ) {
-            this.map_.panTo({ lat: nextPropsCenter.lat, lng: nextPropsCenter.lng });
+            this.map_.panTo({
+              lat: nextPropsCenter.lat,
+              lng: nextPropsCenter.lng,
+            });
           }
         }
       }
@@ -255,7 +301,10 @@ export default class GoogleMap extends Component {
         }
       }
 
-      if (this.props.draggable !== undefined && nextProps.draggable === undefined) {
+      if (
+        this.props.draggable !== undefined &&
+        nextProps.draggable === undefined
+      ) {
         // reset to default
         this.map_.setOptions({ draggable: this.defaultDraggableOption_ });
       } else if (this.props.draggable !== nextProps.draggable) {
@@ -267,12 +316,13 @@ export default class GoogleMap extends Component {
 
   shouldComponentUpdate(nextProps, nextState) {
     // draggable does not affect inner components
-    return !shallowEqual(
-      omit(this.props, ['draggable']),
-      omit(nextProps, ['draggable'])
-    ) || !shallowEqual(this.state, nextState);
+    return (
+      !shallowEqual(
+        omit(this.props, ['draggable']),
+        omit(nextProps, ['draggable'])
+      ) || !shallowEqual(this.state, nextState)
+    );
   }
-
 
   componentDidUpdate(prevProps) {
     this.markersDispatcher_.emit('kON_CHANGE');
@@ -287,8 +337,11 @@ export default class GoogleMap extends Component {
 
     window.removeEventListener('resize', this._onWindowResize);
     window.removeEventListener('keydown', this._onKeyDownCapture);
-    ReactDOM.findDOMNode(this.refs.google_map_dom)
-      .removeEventListener('mousedown', this._onMapMouseDownNative, true);
+    ReactDOM.findDOMNode(this.refs.google_map_dom).removeEventListener(
+      'mousedown',
+      this._onMapMouseDownNative,
+      true
+    );
     window.removeEventListener('mouseup', this._onChildMouseUp, false);
 
     if (this.overlay_) {
@@ -316,30 +369,39 @@ export default class GoogleMap extends Component {
   // (one map coordinate can have different screen coordinates)
   _getMinZoom = () => {
     if (this.geoService_.getWidth() > 0 || this.geoService_.getHeight() > 0) {
-      const tilesPerWidth = Math.ceil(this.geoService_.getWidth() / K_GOOGLE_TILE_SIZE) + 2;
-      const tilesPerHeight = Math.ceil(this.geoService_.getHeight() / K_GOOGLE_TILE_SIZE) + 2;
+      const tilesPerWidth =
+        Math.ceil(this.geoService_.getWidth() / K_GOOGLE_TILE_SIZE) + 2;
+      const tilesPerHeight =
+        Math.ceil(this.geoService_.getHeight() / K_GOOGLE_TILE_SIZE) + 2;
       const maxTilesPerDim = Math.max(tilesPerWidth, tilesPerHeight);
       return Math.ceil(log2(maxTilesPerDim));
     }
     return DEFAULT_MIN_ZOOM;
-  }
+  };
 
   _computeMinZoom = (minZoomOverride, minZoom) => {
     if (minZoomOverride) {
       return minZoom || DEFAULT_MIN_ZOOM;
     }
     return this._getMinZoom();
-  }
+  };
 
   _initMap = () => {
     // only initialize the map once
+    console.log('Initialisin');
     if (this.initialized_) {
       return;
     }
     this.initialized_ = true;
 
-    const propsCenter = latLng2Obj(this.props.center || this.props.defaultCenter);
-    this.geoService_.setView(propsCenter, this.props.zoom || this.props.defaultZoom, 0);
+    const propsCenter = latLng2Obj(
+      this.props.center || this.props.defaultCenter
+    );
+    this.geoService_.setView(
+      propsCenter,
+      this.props.zoom || this.props.defaultZoom,
+      0
+    );
 
     this._onBoundsChanged(); // now we can calculate map bounds center etc...
 
@@ -348,325 +410,357 @@ export default class GoogleMap extends Component {
       ...this.props.bootstrapURLKeys,
     };
 
-    this.props.googleMapLoader(bootstrapURLKeys)
-    .then(maps => {
-      if (!this.mounted_) {
-        return;
-      }
-
-      const centerLatLng = this.geoService_.getCenter();
-
-      const propsOptions = {
-        zoom: this.props.zoom || this.props.defaultZoom,
-        center: new maps.LatLng(centerLatLng.lat, centerLatLng.lng),
-      };
-
-      // prevent to exapose full api
-      // next props must be exposed (console.log(Object.keys(pick(maps, isPlainObject))))
-      // "Animation", "ControlPosition", "MapTypeControlStyle", "MapTypeId",
-      // "NavigationControlStyle", "ScaleControlStyle", "StrokePosition",
-      // "SymbolPath", "ZoomControlStyle",
-      // "event", "DirectionsStatus", "DirectionsTravelMode", "DirectionsUnitSystem",
-      // "DistanceMatrixStatus",
-      // "DistanceMatrixElementStatus", "ElevationStatus", "GeocoderLocationType",
-      // "GeocoderStatus", "KmlLayerStatus",
-      // "MaxZoomStatus", "StreetViewStatus", "TransitMode", "TransitRoutePreference",
-      // "TravelMode", "UnitSystem"
-      const mapPlainObjects = pick(maps, isPlainObject);
-      const options = typeof this.props.options === 'function'
-        ? this.props.options(mapPlainObjects)
-        : this.props.options;
-      const defaultOptions = defaultOptions_(mapPlainObjects);
-
-      const draggableOptions = this.props.draggable !== undefined &&
-        { draggable: this.props.draggable };
-
-      const minZoom = this._computeMinZoom(options.minZoomOverride, options.minZoom);
-      this.minZoom_ = minZoom;
-
-      const preMapOptions = {
-        ...defaultOptions,
-        minZoom,
-        ...options,
-        ...propsOptions,
-      };
-
-      this.defaultDraggableOption_ = preMapOptions.draggable !== undefined
-        ? preMapOptions.draggable
-        : this.defaultDraggableOption_;
-
-      const mapOptions = {
-        ...preMapOptions,
-        ...draggableOptions,
-      };
-
-      if (process.env.NODE_ENV !== 'production') {
-        if (mapOptions.minZoom < minZoom) {
-          console.warn( 'GoogleMap: ' + // eslint-disable-line
-                        'minZoom option is less than recommended ' +
-                        'minZoom option for your map sizes.\n' +
-                        'overrided to value ' + minZoom);
+    this.props
+      .googleMapLoader(bootstrapURLKeys)
+      .then((maps) => {
+        if (!this.mounted_) {
+          return;
         }
-      }
 
-      if (mapOptions.minZoom < minZoom) {
-        mapOptions.minZoom = minZoom;
-      }
+        const centerLatLng = this.geoService_.getCenter();
 
-      const map = new maps.Map(ReactDOM.findDOMNode(this.refs.google_map_dom), mapOptions);
-      this.map_ = map;
-      this.maps_ = maps;
+        const propsOptions = {
+          zoom: this.props.zoom || this.props.defaultZoom,
+          center: new maps.LatLng(centerLatLng.lat, centerLatLng.lng),
+        };
 
-      // render in overlay
-      const this_ = this;
-      const overlay = this.overlay_ = Object.assign(new maps.OverlayView(), {
-        onAdd() {
-          const K_MAX_WIDTH = (typeof screen !== 'undefined') ? `${screen.width}px` : '2000px';
-          const K_MAX_HEIGHT = (typeof screen !== 'undefined') ? `${screen.height}px` : '2000px';
+        // prevent to exapose full api
+        // next props must be exposed (console.log(Object.keys(pick(maps, isPlainObject))))
+        // "Animation", "ControlPosition", "MapTypeControlStyle", "MapTypeId",
+        // "NavigationControlStyle", "ScaleControlStyle", "StrokePosition",
+        // "SymbolPath", "ZoomControlStyle",
+        // "event", "DirectionsStatus", "DirectionsTravelMode", "DirectionsUnitSystem",
+        // "DistanceMatrixStatus",
+        // "DistanceMatrixElementStatus", "ElevationStatus", "GeocoderLocationType",
+        // "GeocoderStatus", "KmlLayerStatus",
+        // "MaxZoomStatus", "StreetViewStatus", "TransitMode", "TransitRoutePreference",
+        // "TravelMode", "UnitSystem"
+        const mapPlainObjects = pick(maps, isPlainObject);
+        const options =
+          typeof this.props.options === 'function'
+            ? this.props.options(mapPlainObjects)
+            : this.props.options;
+        const defaultOptions = defaultOptions_(mapPlainObjects);
 
-          const div = document.createElement('div');
-          this.div = div;
-          div.style.backgroundColor = 'transparent';
-          div.style.position = 'absolute';
-          div.style.left = '0px';
-          div.style.top = '0px';
-          div.style.width = K_MAX_WIDTH; // prevents some chrome draw defects
-          div.style.height = K_MAX_HEIGHT;
+        const draggableOptions = this.props.draggable !== undefined && {
+          draggable: this.props.draggable,
+        };
 
-          const panes = this.getPanes();
-          panes.overlayMouseTarget.appendChild(div);
+        const minZoom = this._computeMinZoom(
+          options.minZoomOverride,
+          options.minZoom
+        );
+        this.minZoom_ = minZoom;
 
-          ReactDOM.render(
-            (
-            <GoogleMapMarkers
-              experimental={this_.props.experimental}
-              onChildClick={this_._onChildClick}
-              onChildMouseDown={this_._onChildMouseDown}
-              onChildMouseEnter={this_._onChildMouseEnter}
-              onChildMouseLeave={this_._onChildMouseLeave}
-              geoService={this_.geoService_}
-              projectFromLeftTop
-              distanceToMouse={this_.props.distanceToMouse}
-              getHoverDistance={this_._getHoverDistance}
-              dispatcher={this_.markersDispatcher_}
-            />
-            ),
-            div,
-            // remove prerendered markers
-            () => this_.setState({ overlayCreated: true }),
-          );
-        },
+        const preMapOptions = {
+          ...defaultOptions,
+          minZoom,
+          ...options,
+          ...propsOptions,
+        };
 
-        onRemove() {
-          ReactDOM.unmountComponentAtNode(this.div);
-        },
+        this.defaultDraggableOption_ =
+          preMapOptions.draggable !== undefined
+            ? preMapOptions.draggable
+            : this.defaultDraggableOption_;
 
-        draw() {
+        const mapOptions = {
+          ...preMapOptions,
+          ...draggableOptions,
+        };
+
+        if (process.env.NODE_ENV !== 'production') {
+          if (mapOptions.minZoom < minZoom) {
+            console.warn(
+              'GoogleMap: ' + // eslint-disable-line
+                'minZoom option is less than recommended ' +
+                'minZoom option for your map sizes.\n' +
+                'overrided to value ' +
+                minZoom
+            );
+          }
+        }
+
+        if (mapOptions.minZoom < minZoom) {
+          mapOptions.minZoom = minZoom;
+        }
+
+        const map = new maps.Map(
+          ReactDOM.findDOMNode(this.refs.google_map_dom),
+          mapOptions
+        );
+        this.map_ = map;
+        this.maps_ = maps;
+
+        // render in overlay
+        const this_ = this;
+        const overlay = (this.overlay_ = Object.assign(new maps.OverlayView(), {
+          onAdd() {
+            const K_MAX_WIDTH =
+              typeof screen !== 'undefined' ? `${screen.width}px` : '2000px';
+            const K_MAX_HEIGHT =
+              typeof screen !== 'undefined' ? `${screen.height}px` : '2000px';
+
+            const div = document.createElement('div');
+            this.div = div;
+            div.style.backgroundColor = 'transparent';
+            div.style.position = 'absolute';
+            div.style.left = '0px';
+            div.style.top = '0px';
+            div.style.width = K_MAX_WIDTH; // prevents some chrome draw defects
+            div.style.height = K_MAX_HEIGHT;
+
+            const panes = this.getPanes();
+            panes.overlayMouseTarget.appendChild(div);
+
+            ReactDOM.render(
+              <GoogleMapMarkers
+                experimental={this_.props.experimental}
+                onChildClick={this_._onChildClick}
+                onChildMouseDown={this_._onChildMouseDown}
+                onChildMouseEnter={this_._onChildMouseEnter}
+                onChildMouseLeave={this_._onChildMouseLeave}
+                geoService={this_.geoService_}
+                projectFromLeftTop
+                distanceToMouse={this_.props.distanceToMouse}
+                getHoverDistance={this_._getHoverDistance}
+                dispatcher={this_.markersDispatcher_}
+              />,
+              div,
+              // remove prerendered markers
+              () => this_.setState({ overlayCreated: true })
+            );
+          },
+
+          onRemove() {
+            ReactDOM.unmountComponentAtNode(this.div);
+          },
+
+          draw() {
+            const div = overlay.div;
+            const overlayProjection = overlay.getProjection();
+            const bounds = map.getBounds();
+            const ne = bounds.getNorthEast();
+            const sw = bounds.getSouthWest();
+            const ptx = overlayProjection.fromLatLngToDivPixel(
+              new maps.LatLng(ne.lat(), sw.lng())
+            );
+
+            // need round for safari still can't find what need for firefox
+            const ptxRounded = detectBrowser().isSafari
+              ? { x: Math.round(ptx.x), y: Math.round(ptx.y) }
+              : { x: ptx.x, y: ptx.y };
+
+            this_.updateCounter_++;
+            this_._onBoundsChanged(map, maps, !this_.props.debounced);
+
+            if (!this_.googleApiLoadedCalled_) {
+              this_._onGoogleApiLoaded({ map, maps });
+              this_.googleApiLoadedCalled_ = true;
+            }
+
+            div.style.left = `${ptxRounded.x}px`;
+            div.style.top = `${ptxRounded.y}px`;
+            if (this_.markersDispatcher_) {
+              this_.markersDispatcher_.emit('kON_CHANGE');
+            }
+          },
+        }));
+
+        overlay.setMap(map);
+
+        maps.event.addListener(map, 'zoom_changed', () => {
+          // recalc position at zoom start
+          if (this_.geoService_.getZoom() !== map.getZoom()) {
+            if (!this_.zoomAnimationInProgress_) {
+              this_.zoomAnimationInProgress_ = true;
+              this_._onZoomAnimationStart();
+            }
+
+            const TIMEOUT_ZOOM = 300;
+
+            if (
+              new Date().getTime() - this.zoomControlClickTime_ <
+              TIMEOUT_ZOOM
+            ) {
+              // there is strange Google Map Api behavior in chrome when zoom animation of map
+              // is started only on second raf call, if was click on zoom control
+              // or +- keys pressed, so i wait for two rafs before change state
+
+              // this does not fully prevent animation jump
+              // but reduce it's occurence probability
+              raf(() =>
+                raf(() => {
+                  this_.updateCounter_++;
+                  this_._onBoundsChanged(map, maps);
+                })
+              );
+            } else {
+              this_.updateCounter_++;
+              this_._onBoundsChanged(map, maps);
+            }
+          }
+        });
+
+        maps.event.addListener(map, 'idle', () => {
+          if (this.resetSizeOnIdle_) {
+            this._setViewSize();
+            const currMinZoom = this._computeMinZoom(
+              this.props.options.minZoomOverride,
+              this.props.options.minZoom
+            );
+
+            if (currMinZoom !== this.minZoom_) {
+              this.minZoom_ = currMinZoom;
+              map.setOptions({ minZoom: currMinZoom });
+            }
+
+            this.resetSizeOnIdle_ = false;
+          }
+
+          if (this_.zoomAnimationInProgress_) {
+            this_.zoomAnimationInProgress_ = false;
+            this_._onZoomAnimationEnd();
+          }
+
           const div = overlay.div;
           const overlayProjection = overlay.getProjection();
           const bounds = map.getBounds();
           const ne = bounds.getNorthEast();
           const sw = bounds.getSouthWest();
-          const ptx = overlayProjection.fromLatLngToDivPixel(new maps.LatLng(ne.lat(), sw.lng()));
-
+          const ptx = overlayProjection.fromLatLngToDivPixel(
+            new maps.LatLng(ne.lat(), sw.lng())
+          );
           // need round for safari still can't find what need for firefox
           const ptxRounded = detectBrowser().isSafari
             ? { x: Math.round(ptx.x), y: Math.round(ptx.y) }
             : { x: ptx.x, y: ptx.y };
 
           this_.updateCounter_++;
-          this_._onBoundsChanged(map, maps, !this_.props.debounced);
+          this_._onBoundsChanged(map, maps);
 
-          if (!this_.googleApiLoadedCalled_) {
-            this_._onGoogleApiLoaded({ map, maps });
-            this_.googleApiLoadedCalled_ = true;
+          if (this.mouse_) {
+            const latLng = this.geoService_.unproject(this.mouse_, true);
+            this.mouse_.lat = latLng.lat;
+            this.mouse_.lng = latLng.lng;
           }
 
+          this._onChildMouseMove();
+
+          this_.dragTime_ = 0;
           div.style.left = `${ptxRounded.x}px`;
           div.style.top = `${ptxRounded.y}px`;
           if (this_.markersDispatcher_) {
             this_.markersDispatcher_.emit('kON_CHANGE');
+            if (this_.fireMouseEventOnIdle_) {
+              this_.markersDispatcher_.emit('kON_MOUSE_POSITION_CHANGE');
+            }
           }
-        },
+        });
+
+        maps.event.addListener(map, 'mouseover', () => {
+          // has advantage over div MouseLeave
+          this_.mouseInMap_ = true;
+        });
+
+        maps.event.addListener(map, 'mouseout', () => {
+          // has advantage over div MouseLeave
+          this_.mouseInMap_ = false;
+          this_.mouse_ = null;
+          this_.markersDispatcher_.emit('kON_MOUSE_POSITION_CHANGE');
+        });
+
+        maps.event.addListener(map, 'drag', () => {
+          this_.dragTime_ = new Date().getTime();
+          this_._onDrag();
+        });
+      })
+      .catch((e) => {
+        console.error(e); // eslint-disable-line no-console
+        throw e;
       });
-
-      overlay.setMap(map);
-
-      maps.event.addListener(map, 'zoom_changed', () => {
-        // recalc position at zoom start
-        if (this_.geoService_.getZoom() !== map.getZoom()) {
-          if (!this_.zoomAnimationInProgress_) {
-            this_.zoomAnimationInProgress_ = true;
-            this_._onZoomAnimationStart();
-          }
-
-          const TIMEOUT_ZOOM = 300;
-
-          if ((new Date()).getTime() - this.zoomControlClickTime_ < TIMEOUT_ZOOM) {
-            // there is strange Google Map Api behavior in chrome when zoom animation of map
-            // is started only on second raf call, if was click on zoom control
-            // or +- keys pressed, so i wait for two rafs before change state
-
-            // this does not fully prevent animation jump
-            // but reduce it's occurence probability
-            raf(() => raf(() => {
-              this_.updateCounter_++;
-              this_._onBoundsChanged(map, maps);
-            }));
-          } else {
-            this_.updateCounter_++;
-            this_._onBoundsChanged(map, maps);
-          }
-        }
-      });
-
-      maps.event.addListener(map, 'idle', () => {
-        if (this.resetSizeOnIdle_) {
-          this._setViewSize();
-          const currMinZoom = this._computeMinZoom(
-            this.props.options.minZoomOverride,
-            this.props.options.minZoom);
-
-          if (currMinZoom !== this.minZoom_) {
-            this.minZoom_ = currMinZoom;
-            map.setOptions({ minZoom: currMinZoom });
-          }
-
-          this.resetSizeOnIdle_ = false;
-        }
-
-        if (this_.zoomAnimationInProgress_) {
-          this_.zoomAnimationInProgress_ = false;
-          this_._onZoomAnimationEnd();
-        }
-
-        const div = overlay.div;
-        const overlayProjection = overlay.getProjection();
-        const bounds = map.getBounds();
-        const ne = bounds.getNorthEast();
-        const sw = bounds.getSouthWest();
-        const ptx = overlayProjection.fromLatLngToDivPixel(new maps.LatLng(ne.lat(), sw.lng()));
-        // need round for safari still can't find what need for firefox
-        const ptxRounded = detectBrowser().isSafari
-          ? { x: Math.round(ptx.x), y: Math.round(ptx.y) }
-          : { x: ptx.x, y: ptx.y };
-
-        this_.updateCounter_++;
-        this_._onBoundsChanged(map, maps);
-
-        if (this.mouse_) {
-          const latLng = this.geoService_.unproject(this.mouse_, true);
-          this.mouse_.lat = latLng.lat;
-          this.mouse_.lng = latLng.lng;
-        }
-
-        this._onChildMouseMove();
-
-        this_.dragTime_ = 0;
-        div.style.left = `${ptxRounded.x}px`;
-        div.style.top = `${ptxRounded.y}px`;
-        if (this_.markersDispatcher_) {
-          this_.markersDispatcher_.emit('kON_CHANGE');
-          if (this_.fireMouseEventOnIdle_) {
-            this_.markersDispatcher_.emit('kON_MOUSE_POSITION_CHANGE');
-          }
-        }
-      });
-
-      maps.event.addListener(map, 'mouseover', () => { // has advantage over div MouseLeave
-        this_.mouseInMap_ = true;
-      });
-
-      maps.event.addListener(map, 'mouseout', () => { // has advantage over div MouseLeave
-        this_.mouseInMap_ = false;
-        this_.mouse_ = null;
-        this_.markersDispatcher_.emit('kON_MOUSE_POSITION_CHANGE');
-      });
-
-      maps.event.addListener(map, 'drag', () => {
-        this_.dragTime_ = (new Date()).getTime();
-        this_._onDrag();
-      });
-    })
-    .catch(e => {
-      console.error(e); // eslint-disable-line no-console
-      throw e;
-    });
-  }
+  };
 
   _onGoogleApiLoaded = (...args) => {
     if (this.props.onGoogleApiLoaded) {
-      if (process.env.NODE_ENV !== 'production' &&
-          this.props.yesIWantToUseGoogleMapApiInternals !== true) {
-        console.warn( 'GoogleMap: ' + // eslint-disable-line
-                      'Usage of internal api objects is dangerous ' +
-                      'and can cause a lot of issues.\n' +
-                      'To hide this warning add yesIWantToUseGoogleMapApiInternals={true} ' +
-                      'to <GoogleMap instance');
+      if (
+        process.env.NODE_ENV !== 'production' &&
+        this.props.yesIWantToUseGoogleMapApiInternals !== true
+      ) {
+        console.warn(
+          'GoogleMap: ' + // eslint-disable-line
+            'Usage of internal api objects is dangerous ' +
+            'and can cause a lot of issues.\n' +
+            'To hide this warning add yesIWantToUseGoogleMapApiInternals={true} ' +
+            'to <GoogleMap instance'
+        );
       }
 
       this.props.onGoogleApiLoaded(...args);
     }
-  }
+  };
 
   _getHoverDistance = () => this.props.hoverDistance;
 
-  _onDrag = (...args) => this.props.onDrag &&
-    this.props.onDrag(...args);
+  _onDrag = (...args) => this.props.onDrag && this.props.onDrag(...args);
 
-  _onZoomAnimationStart = (...args) => this.props.onZoomAnimationStart &&
-    this.props.onZoomAnimationStart(...args)
+  _onZoomAnimationStart = (...args) =>
+    this.props.onZoomAnimationStart && this.props.onZoomAnimationStart(...args);
 
-  _onZoomAnimationEnd = (...args) => this.props.onZoomAnimationEnd &&
-    this.props.onZoomAnimationEnd(...args)
+  _onZoomAnimationEnd = (...args) =>
+    this.props.onZoomAnimationEnd && this.props.onZoomAnimationEnd(...args);
 
   _onChildClick = (...args) => {
     if (this.props.onChildClick) {
       return this.props.onChildClick(...args);
     }
     return undefined;
-  }
+  };
 
   _onChildMouseDown = (hoverKey, childProps) => {
     this.childMouseDownArgs_ = [hoverKey, childProps];
     if (this.props.onChildMouseDown) {
       this.props.onChildMouseDown(hoverKey, childProps, { ...this.mouse_ });
     }
-  }
+  };
 
   // this method works only if this.props.onChildMouseDown was called
   _onChildMouseUp = () => {
     if (this.childMouseDownArgs_) {
       if (this.props.onChildMouseUp) {
-        this.props.onChildMouseUp(...this.childMouseDownArgs_, { ...this.mouse_ });
+        this.props.onChildMouseUp(...this.childMouseDownArgs_, {
+          ...this.mouse_,
+        });
       }
       this.childMouseDownArgs_ = null;
-      this.childMouseUpTime_ = (new Date()).getTime();
+      this.childMouseUpTime_ = new Date().getTime();
     }
-  }
+  };
 
   // this method works only if this.props.onChildMouseDown was called
   _onChildMouseMove = () => {
     if (this.childMouseDownArgs_) {
       if (this.props.onChildMouseMove) {
-        this.props.onChildMouseMove(...this.childMouseDownArgs_, { ...this.mouse_ });
+        this.props.onChildMouseMove(...this.childMouseDownArgs_, {
+          ...this.mouse_,
+        });
       }
     }
-  }
+  };
 
   _onChildMouseEnter = (...args) => {
     if (this.props.onChildMouseEnter) {
       return this.props.onChildMouseEnter(...args);
     }
     return undefined;
-  }
+  };
 
   _onChildMouseLeave = (...args) => {
     if (this.props.onChildMouseLeave) {
       return this.props.onChildMouseLeave(...args);
     }
     return undefined;
-  }
+  };
 
   _setViewSize = () => {
     if (!this.mounted_) return;
@@ -674,16 +768,16 @@ export default class GoogleMap extends Component {
     const mapDom = ReactDOM.findDOMNode(this.refs.google_map_dom);
     this.geoService_.setViewSize(mapDom.clientWidth, mapDom.clientHeight);
     this._onBoundsChanged();
-  }
+  };
 
   _onWindowResize = () => {
     this.resetSizeOnIdle_ = true;
-  }
+  };
 
   _onMapMouseMove = (e) => {
     if (!this.mouseInMap_) return;
 
-    const currTime = (new Date()).getTime();
+    const currTime = new Date().getTime();
     const K_RECALC_CLIENT_RECT_MS = 50;
 
     if (currTime - this.mouseMoveTime_ > K_RECALC_CLIENT_RECT_MS) {
@@ -713,21 +807,21 @@ export default class GoogleMap extends Component {
       this.markersDispatcher_.emit('kON_MOUSE_POSITION_CHANGE');
       this.fireMouseEventOnIdle_ = false;
     }
-  }
+  };
 
   // K_IDLE_CLICK_TIMEOUT - looks like 300 is enough
   _onClick = (...args) =>
-      this.props.onClick &&
-      !this.childMouseDownArgs_ &&
-      ((new Date()).getTime() - this.childMouseUpTime_) > K_IDLE_CLICK_TIMEOUT &&
-      this.dragTime_ === 0 &&
-      this.props.onClick(...args)
+    this.props.onClick &&
+    !this.childMouseDownArgs_ &&
+    new Date().getTime() - this.childMouseUpTime_ > K_IDLE_CLICK_TIMEOUT &&
+    this.dragTime_ === 0 &&
+    this.props.onClick(...args);
 
   _onMapClick = (event) => {
     if (this.markersDispatcher_) {
       // support touch events and recalculate mouse position on click
       this._onMapMouseMove(event);
-      const currTime = (new Date()).getTime();
+      const currTime = new Date().getTime();
       if (currTime - this.dragTime_ > K_IDLE_TIMEOUT) {
         if (this.mouse_) {
           this._onClick({
@@ -739,7 +833,7 @@ export default class GoogleMap extends Component {
         this.markersDispatcher_.emit('kON_CLICK', event);
       }
     }
-  }
+  };
 
   // gmap can't prevent map drag if mousedown event already occured
   // the only workaround I find is prevent mousedown native browser event
@@ -751,36 +845,36 @@ export default class GoogleMap extends Component {
       event.preventDefault();
       event.stopPropagation();
     }
-  }
+  };
 
   _onMapMouseDown = (event) => {
     if (this.markersDispatcher_) {
-      const currTime = (new Date()).getTime();
+      const currTime = new Date().getTime();
       if (currTime - this.dragTime_ > K_IDLE_TIMEOUT) {
         this.markersDispatcher_.emit('kON_MDOWN', event);
       }
     }
-  }
+  };
 
   _onMapMouseDownCapture = () => {
     if (detectBrowser().isChrome) {
       // to fix strange zoom in chrome
       if (!this.mouse_) {
-        this.zoomControlClickTime_ = (new Date()).getTime();
+        this.zoomControlClickTime_ = new Date().getTime();
       }
     }
-  }
+  };
 
   _onKeyDownCapture = () => {
     if (detectBrowser().isChrome) {
-      this.zoomControlClickTime_ = (new Date()).getTime();
+      this.zoomControlClickTime_ = new Date().getTime();
     }
-  }
+  };
 
-  _isCenterDefined = (center) => center && (
-    (isPlainObject(center) && isNumber(center.lat) && isNumber(center.lng)) ||
-    (center.length === 2 && isNumber(center[0]) && isNumber(center[1]))
-  )
+  _isCenterDefined = (center) =>
+    center &&
+    ((isPlainObject(center) && isNumber(center.lat) && isNumber(center.lng)) ||
+      (center.length === 2 && isNumber(center[0]) && isNumber(center[1])));
 
   _onBoundsChanged = (map, maps, callExtBoundsChange) => {
     if (map) {
@@ -788,7 +882,10 @@ export default class GoogleMap extends Component {
       this.geoService_.setView([gmC.lat(), gmC.lng()], map.getZoom(), 0);
     }
 
-    if ((this.props.onChange || this.props.onBoundsChange) && this.geoService_.canProject()) {
+    if (
+      (this.props.onChange || this.props.onBoundsChange) &&
+      this.geoService_.canProject()
+    ) {
       const zoom = this.geoService_.getZoom();
       const bounds = this.geoService_.getBounds();
       const centerLatLng = this.geoService_.getCenter();
@@ -834,13 +931,13 @@ export default class GoogleMap extends Component {
 
               size: this.geoService_.hasSize()
                 ? {
-                  width: this.geoService_.getWidth(),
-                  height: this.geoService_.getHeight(),
-                }
+                    width: this.geoService_.getWidth(),
+                    height: this.geoService_.getHeight(),
+                  }
                 : {
-                  width: 0,
-                  height: 0,
-                },
+                    width: 0,
+                    height: 0,
+                  },
             });
           }
 
@@ -848,7 +945,8 @@ export default class GoogleMap extends Component {
         }
       }
       // uncomment for strange bugs
-      if (process.env.NODE_ENV !== 'production') { // compare with google calculations
+      if (process.env.NODE_ENV !== 'production') {
+        // compare with google calculations
         if (map) {
           const locBounds = map.getBounds();
           const ne = locBounds.getNorthEast();
@@ -857,28 +955,43 @@ export default class GoogleMap extends Component {
           const gmC = map.getCenter();
           // compare with google map
 
-          if (!isArraysEqualEps(
+          if (
+            !isArraysEqualEps(
               [centerLatLng.lat, centerLatLng.lng],
-              [gmC.lat(), gmC.lng()], kEPS
-              )) {
-            console.info('GoogleMap center not eq:',  // eslint-disable-line no-console
-              [centerLatLng.lat, centerLatLng.lng], [gmC.lat(), gmC.lng()]);
+              [gmC.lat(), gmC.lng()],
+              kEPS
+            )
+          ) {
+            console.info(
+              'GoogleMap center not eq:', // eslint-disable-line no-console
+              [centerLatLng.lat, centerLatLng.lng],
+              [gmC.lat(), gmC.lng()]
+            );
           }
 
-          if (!isArraysEqualEps(bounds, [ne.lat(), sw.lng(), sw.lat(), ne.lng()], kEPS)) {
+          if (
+            !isArraysEqualEps(
+              bounds,
+              [ne.lat(), sw.lng(), sw.lat(), ne.lng()],
+              kEPS
+            )
+          ) {
             // this is normal if this message occured on resize
-            console.info('GoogleMap bounds not eq:', '\n',  // eslint-disable-line no-console
-              bounds, '\n', [ne.lat(), sw.lng(), sw.lat(), ne.lng()]);
+            console.info(
+              'GoogleMap bounds not eq:',
+              '\n', // eslint-disable-line no-console
+              bounds,
+              '\n',
+              [ne.lat(), sw.lng(), sw.lat(), ne.lng()]
+            );
           }
         }
       }
     }
-  }
-
+  };
 
   render() {
-    const mapMarkerPrerender = !this.state.overlayCreated
-    ? (
+    const mapMarkerPrerender = !this.state.overlayCreated ? (
       <GoogleMapMarkersPrerender
         experimental={this.props.experimental}
         onChildClick={this._onChildClick}
@@ -891,12 +1004,13 @@ export default class GoogleMap extends Component {
         getHoverDistance={this._getHoverDistance}
         dispatcher={this.markersDispatcher_}
       />
-    )
-    : null;
+    ) : null;
 
-    const otherChildren =  _.flatten(this.props.children).filter(function (child) {
-          return !child.props.lat
-        })
+    const otherChildren = _.flatten(this.props.children).filter(function (
+      child
+    ) {
+      return !child.props.lat;
+    });
 
     return (
       <div
@@ -908,7 +1022,7 @@ export default class GoogleMap extends Component {
         <GoogleMapMap ref="google_map_dom" />
 
         {/* render markers before map load done */}
-        
+
         {mapMarkerPrerender}
         {otherChildren}
       </div>
