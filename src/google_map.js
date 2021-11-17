@@ -528,6 +528,7 @@ class GoogleMap extends Component {
   );
 
   _initMap = () => {
+    console.log("Initialising")
     // only initialize the map once
     if (this.initialized_) {
       return;
