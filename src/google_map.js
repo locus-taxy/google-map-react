@@ -528,7 +528,6 @@ class GoogleMap extends Component {
   );
 
   _initMap = () => {
-    console.log("Initialising")
     // only initialize the map once
     if (this.initialized_) {
       return;
@@ -617,11 +616,13 @@ class GoogleMap extends Component {
 
         mapOptions.minZoom = _checkMinZoom(mapOptions.minZoom, minZoom);
 
-        const map = new maps.Map(
-          ReactDOM.findDOMNode(this.googleMapDom_),
-          mapOptions
-        );
-
+        let map = this.props.mapInstance;
+        if (!map) {
+          map = new maps.Map(
+            ReactDOM.findDOMNode(this.googleMapDom_),
+            mapOptions
+          );
+        }
         this.map_ = map;
         this.maps_ = maps;
 
@@ -1159,6 +1160,7 @@ class GoogleMap extends Component {
         onMouseMove={this._onMapMouseMove}
         onMouseDownCapture={this._onMapMouseDownCapture}
         onClick={this._onMapClick}
+        ref={this.props.mapContainerRef}
       >
         <GoogleMapMap registerChild={this._registerChild} />
         {IS_REACT_16 && overlay && createPortal(this._renderPortal(), overlay)}
