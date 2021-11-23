@@ -207,7 +207,7 @@ class GoogleMap extends Component {
     this.childMouseDownArgs_ = null;
     this.childMouseUpTime_ = 0;
 
-    this.googleMapDom_ = null;
+    this.googleMapDom_ = this.props.mapDOM;
 
     if (process.env.NODE_ENV !== 'production') {
       if (this.props.apiKey) {
@@ -258,6 +258,9 @@ class GoogleMap extends Component {
   }
 
   componentDidMount() {
+    if (this.props.mapDOM) {
+      this.googleMapDom_ = this.props.mapDOM;
+    }
     this.mounted_ = true;
     addPassiveEventListener(window, 'resize', this._onWindowResize, false);
     addPassiveEventListener(window, 'keydown', this._onKeyDownCapture, true);
@@ -1162,7 +1165,9 @@ class GoogleMap extends Component {
         onClick={this._onMapClick}
         ref={this.props.mapContainerRef}
       >
-        <GoogleMapMap registerChild={this._registerChild} />
+        {!this.props.mapDOM && (
+          <GoogleMapMap registerChild={this._registerChild} />
+        )}
         {IS_REACT_16 && overlay && createPortal(this._renderPortal(), overlay)}
 
         {/* render markers before map load done */}
