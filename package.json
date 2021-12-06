@@ -10,6 +10,8 @@
     "build": "yarn run build:lib && yarn run build:umd && yarn run build:umd:min",
     "clean": "rimraf lib dist",
     "prepublish": "yarn run clean && yarn run build",
+    "prepare": "yarn run clean && yarn run build",
+    "prepack": "yarn run clean && yarn run build",
     "format": "prettier --trailing-comma es5 --single-quote --write 'src/**/*.js' 'src/**/*.js'",
     "format:dev": "prettier --trailing-comma es5 --single-quote --write 'develop/**/*.js' 'develop/**/*.js'",
     "lint": "eslint src",
