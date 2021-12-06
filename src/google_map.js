@@ -32,6 +32,7 @@ import {
   removeResizeListener,
 } from './utils/detectElementResize';
 import addPassiveEventListener from './utils/passiveEvents';
+import { googleMapInstance } from 'utils/mapInstance';
 
 // consts
 const kEPS = 0.00001;
@@ -433,41 +434,41 @@ class GoogleMap extends Component {
   }
 
   componentWillUnmount() {
-    this.mounted_ = false;
-    const mapDom = ReactDOM.findDOMNode(this.googleMapDom_);
-    if (mapDom) {
-      mapDom.removeEventListener('mousedown', this._onMapMouseDownNative, true);
-    }
-    window.removeEventListener('resize', this._onWindowResize);
-    window.removeEventListener('keydown', this._onKeyDownCapture);
-    window.removeEventListener('mouseup', this._onChildMouseUp, false);
-    if (this.props.resetBoundsOnResize) {
-      removeResizeListener(mapDom, this._mapDomResizeCallback);
-    }
+    // this.mounted_ = false;
+    // const mapDom = ReactDOM.findDOMNode(this.googleMapDom_);
+    // if (mapDom) {
+    //   mapDom.removeEventListener('mousedown', this._onMapMouseDownNative, true);
+    // }
+    // window.removeEventListener('resize', this._onWindowResize);
+    // window.removeEventListener('keydown', this._onKeyDownCapture);
+    // window.removeEventListener('mouseup', this._onChildMouseUp, false);
+    // if (this.props.resetBoundsOnResize) {
+    //   removeResizeListener(mapDom, this._mapDomResizeCallback);
+    // }
 
-    if (this.overlay_) {
-      // this triggers overlay_.onRemove(), which will unmount the <GoogleMapMarkers/>
-      this.overlay_.setMap(null);
-    }
+    // if (this.overlay_) {
+    //   // this triggers overlay_.onRemove(), which will unmount the <GoogleMapMarkers/>
+    //   this.overlay_.setMap(null);
+    // }
 
-    if (this.maps_ && this.map_ && this.props.shouldUnregisterMapOnUnmount) {
-      // fix google, as otherwise listeners works even without map
-      this.map_.setOptions({ scrollwheel: false });
-      this.maps_.event.clearInstanceListeners(this.map_);
-    }
+    // if (this.maps_ && this.map_ && this.props.shouldUnregisterMapOnUnmount) {
+    //   // fix google, as otherwise listeners works even without map
+    //   this.map_.setOptions({ scrollwheel: false });
+    //   this.maps_.event.clearInstanceListeners(this.map_);
+    // }
 
-    if (this.props.shouldUnregisterMapOnUnmount) {
-      this.map_ = null;
-      this.maps_ = null;
-    }
+    // if (this.props.shouldUnregisterMapOnUnmount) {
+    //   this.map_ = null;
+    //   this.maps_ = null;
+    // }
     this.markersDispatcher_.dispose();
 
-    this.resetSizeOnIdle_ = false;
+    // this.resetSizeOnIdle_ = false;
 
-    if (this.props.shouldUnregisterMapOnUnmount) {
-      delete this.map_;
-      delete this.markersDispatcher_;
-    }
+    // if (this.props.shouldUnregisterMapOnUnmount) {
+    //   delete this.map_;
+    //   delete this.markersDispatcher_;
+    // }
   }
 
   // calc minZoom if map size available
@@ -616,7 +617,7 @@ class GoogleMap extends Component {
 
         mapOptions.minZoom = _checkMinZoom(mapOptions.minZoom, minZoom);
 
-        const map = new maps.Map(
+        const map = googleMapInstance.init(
           ReactDOM.findDOMNode(this.googleMapDom_),
           mapOptions
         );
