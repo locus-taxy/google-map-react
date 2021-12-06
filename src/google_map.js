@@ -32,7 +32,7 @@ import {
   removeResizeListener,
 } from './utils/detectElementResize';
 import addPassiveEventListener from './utils/passiveEvents';
-import { googleMapInstance } from 'utils/mapInstance';
+import { googleMapInstance } from './utils/mapInstance';
 
 // consts
 const kEPS = 0.00001;
