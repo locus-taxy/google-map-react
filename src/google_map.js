@@ -528,6 +528,10 @@ class GoogleMap extends Component {
     />
   );
 
+  isAnotherMapInstanceMounted = () => {
+    return document.querySelector('[aria-label="Map"]');
+  };
+
   _initMap = () => {
     // only initialize the map once
     if (this.initialized_) {
@@ -616,11 +620,18 @@ class GoogleMap extends Component {
         };
 
         mapOptions.minZoom = _checkMinZoom(mapOptions.minZoom, minZoom);
-
-        const map = googleMapInstance.init(
-          ReactDOM.findDOMNode(this.googleMapDom_),
-          mapOptions
-        );
+        let map;
+        if (!this.isAnotherMapInstanceMounted()) {
+          map = googleMapInstance.init(
+            ReactDOM.findDOMNode(this.googleMapDom_),
+            mapOptions
+          );
+        } else {
+          map = new maps.Map(
+            ReactDOM.findDOMNode(this.googleMapDom_),
+            mapOptions
+          );
+        }
 
         this.map_ = map;
         this.maps_ = maps;
@@ -937,7 +948,8 @@ class GoogleMap extends Component {
       this.geoService_.setViewSize(window.innerWidth, window.innerHeight);
     } else {
       const mapDom = ReactDOM.findDOMNode(this.googleMapDom_);
-      this.geoService_.setViewSize(mapDom.clientWidth, mapDom.clientHeight);
+      mapDom &&
+        this.geoService_.setViewSize(mapDom.clientWidth, mapDom.clientHeight);
     }
     this._onBoundsChanged();
   };

@@ -17,9 +17,7 @@ class GoogleMap {
     } else {
       this.updateOptions(options);
     }
-
     domElement.appendChild(this.mapDOM);
-
     return this.mapInstance;
   };
 
