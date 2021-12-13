@@ -32,7 +32,6 @@ import {
   removeResizeListener,
 } from './utils/detectElementResize';
 import addPassiveEventListener from './utils/passiveEvents';
-import { googleMapInstance } from './utils/mapInstance';
 
 // consts
 const kEPS = 0.00001;
@@ -609,18 +608,12 @@ class GoogleMap extends Component {
         };
 
         mapOptions.minZoom = _checkMinZoom(mapOptions.minZoom, minZoom);
-        let map;
-        if (!this.isAnotherMapInstanceMounted()) {
-          map = googleMapInstance.init(
+        const map =
+          this.props.mapInstance?.init(
             ReactDOM.findDOMNode(this.googleMapDom_),
             mapOptions
-          );
-        } else {
-          map = new maps.Map(
-            ReactDOM.findDOMNode(this.googleMapDom_),
-            mapOptions
-          );
-        }
+          ) ||
+          new maps.Map(ReactDOM.findDOMNode(this.googleMapDom_), mapOptions);
 
         this.map_ = map;
         this.maps_ = maps;
