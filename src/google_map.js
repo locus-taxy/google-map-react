@@ -516,10 +516,6 @@ class GoogleMap extends Component {
     />
   );
 
-  isAnotherMapInstanceMounted = () => {
-    return document.querySelector('[aria-label="Map"]');
-  };
-
   _initMap = () => {
     // only initialize the map once
     if (this.initialized_) {
