@@ -450,12 +450,6 @@ class GoogleMap extends Component {
       this.overlay_.setMap(null);
     }
 
-    if (this.maps_ && this.map_ && this.props.shouldUnregisterMapOnUnmount) {
-      // fix google, as otherwise listeners works even without map
-      this.map_.setOptions({ scrollwheel: false });
-      this.maps_.event.clearInstanceListeners(this.map_);
-    }
-
     if (this.props.shouldUnregisterMapOnUnmount) {
       this.map_ = null;
       this.maps_ = null;
@@ -463,11 +457,6 @@ class GoogleMap extends Component {
     this.markersDispatcher_.dispose();
 
     this.resetSizeOnIdle_ = false;
-
-    if (this.props.shouldUnregisterMapOnUnmount) {
-      delete this.map_;
-      delete this.markersDispatcher_;
-    }
   }
 
   // calc minZoom if map size available
@@ -616,10 +605,12 @@ class GoogleMap extends Component {
 
         mapOptions.minZoom = _checkMinZoom(mapOptions.minZoom, minZoom);
 
-        const map = new maps.Map(
-          ReactDOM.findDOMNode(this.googleMapDom_),
-          mapOptions
-        );
+        const map =
+          this.props.mapInstance?.init(
+            ReactDOM.findDOMNode(this.googleMapDom_),
+            mapOptions
+          ) ||
+          new maps.Map(ReactDOM.findDOMNode(this.googleMapDom_), mapOptions);
 
         this.map_ = map;
         this.maps_ = maps;
@@ -936,7 +927,8 @@ class GoogleMap extends Component {
       this.geoService_.setViewSize(window.innerWidth, window.innerHeight);
     } else {
       const mapDom = ReactDOM.findDOMNode(this.googleMapDom_);
-      this.geoService_.setViewSize(mapDom.clientWidth, mapDom.clientHeight);
+      mapDom &&
+        this.geoService_.setViewSize(mapDom.clientWidth, mapDom.clientHeight);
     }
     this._onBoundsChanged();
   };
