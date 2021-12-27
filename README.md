@@ -203,5 +203,8 @@ If you get the error `Module not found: Can't resolve 'google-react-map'...` whi
 
 * Older browsers (http://caniuse.com/#feat=promises) will need a ES6 Promise polyfill in order to work.
 
+## To Do
+* Prepare script configured in package.json is not preparing the dist files in production build. Hence, we have pushed the dist folder as a workaround. We need to figure out how to automate the building of dist folder.
+
 ## !!! We are looking for contributors
 We're actively looking for contributors, please send a message to the Owner or any of the Collaborators.
