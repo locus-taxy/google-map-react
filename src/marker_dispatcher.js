@@ -7,10 +7,7 @@ export default class MarkerDispatcher extends EventEmitter {
   }
 
   getChildren() {
-    // If no lat lng => They are not marker
-    return _.flatten(this.gmapInstance.props.children).filter(function (child) {
-        return !!child.props.lat
-      });
+    return this.gmapInstance.props.children;
   }
 
   getMousePosition() {

@@ -1,5 +1,5 @@
 import React from 'react';
-import GoogleMapMarkers from './google_map_markers.js';
+import GoogleMapMarkers from './google_map_markers';
 
 const style = {
   width: '50%',
