@@ -11,8 +11,8 @@
   },
   "dependencies": {
     "google-map-react": "link:..",
-    "react": "link:../node_modules/react",
-    "react-dom": "link:../node_modules/react-dom",
+    "react": "0.14.10",
+    "react-dom": "0.14.10",
     "react-scripts": "link:../node_modules/react-scripts",
     "styled-components": "^5.1.1"
   },
