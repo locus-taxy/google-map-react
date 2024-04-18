@@ -17,9 +17,9 @@
   "scripts": {
     "build": "microbundle-crl -f cjs,umd src/index.cjs.js && microbundle-crl -f es,modern src/index.js",
     "start": "microbundle-crl watch -f es,modern src/index.js",
-    "prepare": "run-s build",
-    "test": "run-s test:unit test:lint test:build",
-    "test:build": "run-s build",
+    "prepare": "npm-run-all build",
+    "test": "npm-run-all test:unit test:lint test:build",
+    "test:build": "npm-run-all build",
     "test:lint": "eslint .",
     "test:unit": "cross-env CI=1 react-scripts test --env=jsdom",
     "test:watch": "react-scripts test --env=jsdom",
