@@ -73,5 +73,8 @@
     "component",
     "javascript",
     "react-component"
-  ]
+  ],
+  "volta": {
+    "yarn": "1.22.10"
+  }
 }
