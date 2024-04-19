@@ -15,11 +15,11 @@
     "node": ">=10"
   },
   "scripts": {
-    "build": "yarn microbundle-crl -f cjs,umd src/index.cjs.js && yarn microbundle-crl -f es,modern src/index.js",
-    "start": "yarn microbundle-crl watch -f es,modern src/index.js",
-    "prepare": "yarn run-s build",
-    "test": "yarn run-s test:unit test:lint test:build",
-    "test:build": "yarn run-s build",
+    "build": "microbundle-crl -f cjs,umd src/index.cjs.js && microbundle-crl -f es,modern src/index.js",
+    "start": "microbundle-crl watch -f es,modern src/index.js",
+    "prepare": "run-s build",
+    "test": "run-s test:unit test:lint test:build",
+    "test:build": "run-s build",
     "test:lint": "eslint .",
     "test:unit": "cross-env CI=1 react-scripts test --env=jsdom",
     "test:watch": "react-scripts test --env=jsdom",
