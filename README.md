@@ -6,6 +6,7 @@ This repository accumulation of all the external packages used in the Frontend D
 |--------------------|--------------------------------------------------------------------|
 | google-map-react   | https://github.com/locus-taxy/google-map-react/tree/locus-master   |
 | fixed-data-table-2 | https://github.com/locus-taxy/fixed-data-table-2/tree/locus-master |
+| react-automata     | https://github.com/locus-taxy/react-automata/tree/locus-master     |
 
 ## How to add a new package
 We are using git-subtree to manage the external packages. To add a new package, you can use the following command:
