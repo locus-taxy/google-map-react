@@ -1,5 +1,5 @@
 {
-  "name": "react-grid-layout",
+  "name": "@locus-taxy/react-grid-layout",
   "version": "0.17.1",
   "description": "A draggable and resizable grid layout with responsive breakpoints, for React.",
   "main": "index.js",
@@ -75,9 +75,6 @@
     "webpack": "^4.41.5",
     "webpack-cli": "^3.3.10",
     "webpack-dev-server": "^3.10.1"
-  },
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org"
   },
   "jest": {
     "testMatch": [
