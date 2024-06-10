@@ -1,5 +1,5 @@
 {
-  "name": "react-automata",
+  "name": "@locus-taxy/react-automata",
   "version": "3.0.0",
   "description": "A state machine abstraction for React",
   "main": "dist/react-automata.js",
