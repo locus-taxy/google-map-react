@@ -40,4 +40,4 @@ jobs:
 
       # Runs a set of commands using the runners shell
       - name: Publish packages
-        run: yarn lerna build
+        run: yarn lerna run build
