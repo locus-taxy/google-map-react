@@ -9,6 +9,7 @@ This repository accumulation of all the external packages used in the Frontend D
 | react-automata         | https://github.com/locus-taxy/react-automata/tree/locus-master         |
 | react-big-calendar     | https://github.com/locus-taxy/react-big-calendar/tree/locus-master     |
 | react-css-themr-legacy | https://github.com/locus-taxy/react-css-themr-legacy/tree/locus-master |
+| react-grid-layout      | https://github.com/locus-taxy/react-grid-layout/tree/locus-master      |
 
 ## How to add a new package
 We are using git-subtree to manage the external packages. To add a new package, you can use the following command:
