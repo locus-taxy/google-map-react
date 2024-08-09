@@ -20,7 +20,7 @@
     "url": "https://github.com/littlebits/react-popover.git"
   },
   "author": "Jason Kuhrt <jasonkuhrt@me.com> (http://jasonkuhrt.com/)",
-  "name": "react-popover",
+  "name": "@locus-taxy/react-popover",
   "homepage": "https://github.com/littlebits/react-popover",
   "main": "index.js",
   "description": "A specification backed popover for react",
