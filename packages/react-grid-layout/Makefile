@@ -1,6 +1,6 @@
 .DELETE_ON_ERROR:
 
-export BIN := $(shell npm bin)
+export BIN := $(shell yarn bin)
 PATH := $(BIN):$(PATH)
 DIST = ./dist
 BUILD = ./build
@@ -19,7 +19,7 @@ clean:
 
 dev:
 	@$(BIN)/webpack-dev-server --config webpack-dev-server.config.js \
-	  --hot --progress --colors 
+	  --hot --progress --colors
 
 # Allows usage of `make install`, `make link`
 install link:
@@ -41,7 +41,7 @@ build-example:
 
 view-example:
 	env CONTENT_BASE="/examples/" node ./examples/generate.js
-	@$(BIN)/webpack-dev-server --config webpack-examples.config.js --progress --colors 
+	@$(BIN)/webpack-dev-server --config webpack-examples.config.js --progress --colors
 
 # FIXME flow is usually global
 lint:

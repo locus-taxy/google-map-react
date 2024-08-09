@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "make lint",
     "test": "make test",
-    "build": "make build",
+    "build": "make clean && babel --out-dir ./build ./lib && NODE_OPTIONS=--openssl-legacy-provider webpack",
     "build-example": "make build-example",
     "view-example": "make view-example",
     "dev": "make dev",
@@ -92,5 +92,9 @@
     "hooks": {
       "pre-commit": "lint-staged && make lint && make test"
     }
+  },
+  "volta": {
+    "node": "18.0.0",
+    "yarn": "1.22.22"
   }
 }
